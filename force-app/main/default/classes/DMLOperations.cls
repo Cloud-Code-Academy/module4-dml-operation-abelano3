@@ -92,11 +92,13 @@ public with sharing class DMLOperations {
      */
     public static void updateContactLastName(Id contactId, String newLastName) {
         // Retrieve the Contact from the database
-        // [SELECT Id FROM Contact WHERE Id = :contactId]
+        Contact contactToUpdate = [SELECT Id FROM Contact WHERE Id = :contactId];
 
         // Update the Contact's last name
+        contactToUpdate.LastName = newLastName;
 
         // Update the Contact in the database
+        update contactToUpdate;
     }
 
     /**
@@ -108,11 +110,13 @@ public with sharing class DMLOperations {
      */
     public static void updateOpportunityStage(Id oppId, String newStage) {
         // Retrieve the Opportunity from the database
-        // [SELECT Id FROM Opportunity WHERE Id = :oppId]
+        Opportunity opportunityToUpdate =  [SELECT Id FROM Opportunity WHERE Id = :oppId];
 
         // Update the Opportunity's stage
+        opportunityToUpdate.StageName = newStage;
 
         // Update the Opportunity in the database
+        update opportunityToUpdate;
     }
 
     /**
@@ -125,9 +129,13 @@ public with sharing class DMLOperations {
      */
     public static void updateAccountFields(Id accountId, String newName, String newIndustry) {
         // Query the account
-        // [SELECT Id FROM Account WHERE Id = :accountId]
+        Account accountToUpdate = [SELECT Id FROM Account WHERE Id = :accountId];
 
         // Update the Account with the given Id with the new name and industry
+        accountToUpdate.Name = newName;
+        accountToUpdate.Industry = newIndustry;
+
+        update accountToUpdate;
     }
 
 
