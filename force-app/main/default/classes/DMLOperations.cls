@@ -242,7 +242,6 @@ public with sharing class DMLOperations {
             String accountName = con.LastName;
             Account account = upsertAccount(accountName);
         
-
 		    // Link the Contact to its Account using the Account Id
             con.AccountId = account.Id;
 
@@ -258,12 +257,21 @@ public with sharing class DMLOperations {
      * @param leadNames The list of Lead names to be inserted.
      */
     public static void insertAndDeleteLeads(List<String> leadNames) {
+        List<Lead> leadsToInsert = new List<Lead>();
+
         // Loop through each Lead name
+        for (String leadName : leadNames) {
+            leadsToInsert.add(new Lead(LastName = leadName, Company = 'Test Company'));
+            
+        }
 
         // Insert the Leads
+        insert leadsToInsert;
 
         // Delete the Leads
-    }
+        delete leadsToInsert;
+}
+
 
 
     /**
@@ -273,8 +281,18 @@ public with sharing class DMLOperations {
      * @param numOfCases The number of cases to create.
      */
     public static void createAndDeleteCases(String accountId, Integer numOfCases) {
+        List<Case> casesToInsert = new List<Case>();
+
         // Insert the cases
+        for (Integer i = 0; i < numOfCases; i++) {
+            Case myCase = new Case();
+            myCase.AccountId = accountId;
+            casesToInsert.add(myCase);
+        }
+
+        insert casesToInsert;
 
         // Delete the cases
+        delete casesToInsert;
     }
 }
