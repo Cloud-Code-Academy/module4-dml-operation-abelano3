@@ -37,8 +37,10 @@ public with sharing class DMLOperations {
         newAcc.Name = 'Test Account AB';
         newAcc.Phone = '(800) 233-3300';
 
-        // Insert the Account into the database
-        insert newAcc;
+        if (Schema.sObjectType.Account.isCreateable()) {
+            // Insert the Account into the database
+            insert newAcc;
+        }
 
         // Return the Id of the newly created Account
         return newAcc.Id;
@@ -76,8 +78,10 @@ public with sharing class DMLOperations {
         // Set the AccountId field to the given accountId
         newCon.AccountId = accountId;
 
-        // Insert the Contact into the database
-        insert newCon;
+        if (Schema.sObjectType.Contact.isCreateable()) {   
+            // Insert the Contact into the database
+            insert newCon;
+        }
 
         // Return the Id of the newly created Contact
         return newCon.Id;
@@ -97,8 +101,10 @@ public with sharing class DMLOperations {
         // Update the Contact's last name
         contactToUpdate.LastName = newLastName;
 
-        // Update the Contact in the database
-        update contactToUpdate;
+        if (Schema.sObjectType.Contact.isUpdateable()) {           
+            // Update the Contact in the database
+            update contactToUpdate;
+        }
     }
 
     /**
@@ -109,6 +115,8 @@ public with sharing class DMLOperations {
      * @param newStage The new stage for the Opportunity.
      */
     public static void updateOpportunityStage(Id oppId, String newStage) {
+        if (Schema.sObjectType.Opportunity.isUpdateable()) {
+
         // Retrieve the Opportunity from the database
         Opportunity opportunityToUpdate =  [SELECT Id FROM Opportunity WHERE Id = :oppId];
 
@@ -116,7 +124,8 @@ public with sharing class DMLOperations {
         opportunityToUpdate.StageName = newStage;
 
         // Update the Opportunity in the database
-        update opportunityToUpdate;
+            update opportunityToUpdate;
+        }
     }
 
     /**
@@ -135,7 +144,9 @@ public with sharing class DMLOperations {
         accountToUpdate.Name = newName;
         accountToUpdate.Industry = newIndustry;
 
-        update accountToUpdate;
+        if (Schema.sObjectType.Account.isUpdateable()) {
+            update accountToUpdate;
+        }
     }
 
 
@@ -161,7 +172,9 @@ public with sharing class DMLOperations {
             opp.Amount = 50000;
         }
 
-       upsert opportunities; // Upsert the opportunities List so that records are either updated or created
+        if (Schema.sObjectType.Opportunity.isCreateable()) {
+            upsert opportunities; // Upsert the opportunities List so that records are either updated or created
+        }
     }
 
     /**
@@ -178,6 +191,8 @@ public with sharing class DMLOperations {
         Account acc = new Account(Name = accountName);
         insert acc;
 
+        List<Opportunity> opportunitiesToUpsert = new List<Opportunity>();
+
         // Loop through each Opportunity name
         for (String oppName : oppNames) {
             Opportunity opp = new Opportunity();
@@ -187,10 +202,12 @@ public with sharing class DMLOperations {
             opp.AccountId = acc.Id;
             opp.StageName = 'Qualification';
             opp.CloseDate = Date.today().addMonths(3);
+            opportunitiesToUpsert.add(opp);
+        }
 
+        if (Schema.sObjectType.Opportunity.isCreateable()) {
             // Add the Opportunity to the list
-            upsert opp;
-
+            upsert opportunitiesToUpsert;
         }
     }
     
@@ -244,11 +261,11 @@ public with sharing class DMLOperations {
         
 		    // Link the Contact to its Account using the Account Id
             con.AccountId = account.Id;
-
-		    // Upsert the Contacts
-            upsert contactsToUpsert;
         }
     }
+            
+        // Upsert the Contacts
+        upsert contactsToUpsert;
 }
 
     /**
@@ -265,11 +282,13 @@ public with sharing class DMLOperations {
             
         }
 
-        // Insert the Leads
-        insert leadsToInsert;
+        if (Schema.sObjectType.Lead.isCreateable() && Schema.sObjectType.Lead.isDeletable()) {
+            // Insert the Leads
+            insert leadsToInsert;
 
-        // Delete the Leads
-        delete leadsToInsert;
+            // Delete the Leads
+            delete leadsToInsert;
+        }
 }
 
 
@@ -283,16 +302,18 @@ public with sharing class DMLOperations {
     public static void createAndDeleteCases(String accountId, Integer numOfCases) {
         List<Case> casesToInsert = new List<Case>();
 
-        // Insert the cases
         for (Integer i = 0; i < numOfCases; i++) {
             Case myCase = new Case();
             myCase.AccountId = accountId;
             casesToInsert.add(myCase);
         }
 
-        insert casesToInsert;
+        if (Schema.sObjectType.Case.isCreateable() && Schema.sObjectType.Case.isDeletable()) {
+            // Insert the cases
+            insert casesToInsert;
 
-        // Delete the cases
-        delete casesToInsert;
+            // Delete the cases
+            delete casesToInsert;
+        }
     }
 }
