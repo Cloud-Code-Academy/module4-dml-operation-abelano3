@@ -149,10 +149,19 @@ public with sharing class DMLOperations {
      */
     public static void upsertOpportunityList(List<Opportunity> opportunities) {
         // Loop through each Opportunity in the list
+        for (Opportunity opp : opportunities) {
+
             // Set the Opportunity's Stage to Qualification
+            opp.StageName = 'Qualification';
+
             // Set the Opportunity's Close Date to 3 months from today
+            opp.CloseDate = date.today().addMonths(3);
+
             // Set the Opportunity's Amount to 50000
-        // Upsert the opportunities List so that records are either updated or created
+            opp.Amount = 50000;
+        }
+
+       upsert opportunities; // Upsert the opportunities List so that records are either updated or created
     }
 
     /**
@@ -166,9 +175,23 @@ public with sharing class DMLOperations {
      * @param oppNames The list of Opportunity names.
      */
     public static void upsertOpportunities(String accountName, List<String> oppNames) {
+        Account acc = new Account(Name = accountName);
+        insert acc;
+
         // Loop through each Opportunity name
+        for (String oppName : oppNames) {
+            Opportunity opp = new Opportunity();
+
             // Create an Opportunity with the given name
+            opp.Name = oppName;
+            opp.AccountId = acc.Id;
+            opp.StageName = 'Qualification';
+            opp.CloseDate = Date.today().addMonths(3);
+
             // Add the Opportunity to the list
+            upsert opp;
+
+        }
     }
     
     /**
@@ -184,11 +207,20 @@ public with sharing class DMLOperations {
 		List<Account> accounts = [SELECT Id FROM Account WHERE Name = :accountName];
 
 		// if the Account exists, update the description
+        if (!accounts.isEmpty()) {
+            Account myAcc = accounts[0];
+            myAcc.Description = 'Updated Account';
+            update myAcc;
+            return myAcc;        
+        } else {
 
-		// otherwise, create a new Account and set the description
+                // otherwise, create a new Account and set the description
+                Account newAcc = new Account(Name = accountName, Description = 'New Account');
 
-		// Upsert the Account
-		return null;
+                // Upsert the Account
+		        upsert newAcc;
+                return newAcc;
+            }
 	}
 
     /**
@@ -202,15 +234,23 @@ public with sharing class DMLOperations {
 	 */
 	public static void upsertAccountsWithContacts(List<Contact> contactsToUpsert) {
 		// Loop through each Contact
+        for (Contact con : contactsToUpsert) {
 
 		// Extract the Account Name from Contact's LastName
-
 		// Get the account based on the name or create one if it doesn't exist
+        if (con.LastName != null) {
+            String accountName = con.LastName;
+            Account account = upsertAccount(accountName);
+        
 
-		// Link the Contact to its Account using the Account Id
+		    // Link the Contact to its Account using the Account Id
+            con.AccountId = account.Id;
 
-		// Upsert the Contacts
-	}
+		    // Upsert the Contacts
+            upsert contactsToUpsert;
+        }
+    }
+}
 
     /**
      * Question 11
